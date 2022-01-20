@@ -1,23 +1,20 @@
 const request = require('request');
-const fs = require('fs');
 
-let inputArray = process.argv.slice(2);
-let catName = inputArray[0];
-const catUrl = `https://api.thecatapi.com/v1/breeds/search?q=${catName}`;
+const fetchBreedDescription = function(breedName, callback) {
 
-request(catUrl, (error, repsonse, body) => {
-  if (error) {
-    console.log('Error: ', error);
-  }
-  fs.writeFile(`./${catName}.JSON`, body, error => {
+  const catUrl = `https://api.thecatapi.com/v1/breeds/search?q=${breedName}`;
+
+  request(catUrl, (error, response, body) => {
     if (error) {
-      console.log('Error: ', error);
+      return error;
     }
-    if (body === '[]') {
-      return console.log('Error cat name not found');
-    }
+    // console.log(response && response.statusCode);
     const data = JSON.parse(body);
-    console.log(data[0]['description']);
+    if (!data[0]) {
+      return callback('Error cat name not found', null);
+    }
+    return callback(null, data[0].description);
   });
-});
+};
 
+module.exports = {fetchBreedDescription};
